@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres
+    container_name: JWT-Auth
+    environment:
+      POSTGRES_DB: jwt_auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "54105:5432"
+
+#  postgres-userchat:
+#    image: postgres
+#    container_name: postgres-container-userchat
+#    environment:
+#      POSTGRES_DB: webauth2
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: postgres
+#    ports:
+#      - "54332:5432"
