@@ -1,8 +1,12 @@
-package com.chatico.jwtauthgradle.userchat;
+package com.chatico.jwtauthgradle.controller;
 
 
 
 import com.chatico.jwtauthgradle.auth.RegistrationRequest;
+import com.chatico.jwtauthgradle.repository.UserChatRepository;
+import com.chatico.jwtauthgradle.userchat.Role;
+import com.chatico.jwtauthgradle.userchat.UserChat;
+import com.chatico.jwtauthgradle.service.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

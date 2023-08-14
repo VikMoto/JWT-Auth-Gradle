@@ -2,7 +2,7 @@ package com.chatico.jwtauthgradle.config;
 
 
 
-import com.chatico.jwtauthgradle.userchat.UserChatRepository;
+import com.chatico.jwtauthgradle.repository.UserChatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

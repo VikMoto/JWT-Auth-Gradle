@@ -1,5 +1,6 @@
-package com.chatico.jwtauthgradle.userchat;
+package com.chatico.jwtauthgradle.repository;
 
+import com.chatico.jwtauthgradle.userchat.UserChat;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

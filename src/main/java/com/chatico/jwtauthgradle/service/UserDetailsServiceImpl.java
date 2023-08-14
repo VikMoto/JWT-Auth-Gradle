@@ -1,9 +1,11 @@
-package com.chatico.jwtauthgradle.userchat;
+package com.chatico.jwtauthgradle.service;
 
 
 
+import com.chatico.jwtauthgradle.repository.UserChatRepository;
 import com.chatico.jwtauthgradle.token.ConfirmationToken;
 import com.chatico.jwtauthgradle.token.ConfirmationTokenService;
+import com.chatico.jwtauthgradle.userchat.UserChat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

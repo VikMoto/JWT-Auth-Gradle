@@ -19,7 +19,7 @@ import java.util.Objects;
 
 
 @Entity
-@Table(name = "userchat")
+@Table(name = "user_chat")
 @Data
 @Builder
 @NoArgsConstructor
@@ -48,8 +48,8 @@ public class UserChat implements UserDetails {
     private String email;
     private String password;
 
-    private Boolean enabled = false;
-    private Boolean locked = false;
+    private boolean enabled = false;
+    private boolean locked = false;
 
    private String userPic;
 
@@ -79,10 +79,10 @@ public class UserChat implements UserDetails {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastVisit;
 
-    private Boolean isAccountNonExpired;
-    private Boolean isAccountNonLocked;
-    private Boolean isCredentialsNonExpired;
-    private Boolean isEnabled;
+    private boolean isAccountNonExpired;
+    private boolean isAccountNonLocked;
+    private boolean isCredentialsNonExpired;
+
 
 //    @OneToMany(
 //            mappedBy = "userChat",
@@ -96,17 +96,17 @@ public class UserChat implements UserDetails {
         MALE, FEMALE
     }
 
-    public UserChat(String firstName,
-                   String lastName,
-                   String email,
-                   String password,
-                   Role role) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-    }
+//    public UserChat(String firstName,
+//                   String lastName,
+//                   String email,
+//                   String password,
+//                   Role role) {
+//        this.firstName = firstName;
+//        this.lastName = lastName;
+//        this.email = email;
+//        this.password = password;
+//        this.role = role;
+//    }
 
     @Override
     public boolean equals(Object o) {

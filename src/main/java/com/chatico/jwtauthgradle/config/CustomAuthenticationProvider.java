@@ -1,7 +1,7 @@
 package com.chatico.jwtauthgradle.config;
 
 
-import com.chatico.jwtauthgradle.userchat.UserDetailsServiceImpl;
+import com.chatico.jwtauthgradle.service.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;

@@ -11,7 +11,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
-
 import static com.chatico.jwtauthgradle.userchat.Permission.*;
 import static com.chatico.jwtauthgradle.userchat.Role.ADMIN;
 import static com.chatico.jwtauthgradle.userchat.Role.MANAGER;
@@ -30,7 +29,7 @@ public class SecurityConfiguration {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
-            .csrf((csrf) -> csrf.disable())
+            .csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable())
             .authorizeHttpRequests((authorizeHttpRequests) ->
                     authorizeHttpRequests
                             .requestMatchers(
@@ -60,7 +59,6 @@ public class SecurityConfiguration {
 
 
        /* .requestMatchers("/api/v1/admin/**").hasRole(ADMIN.name())
-
         .requestMatchers(GET, "/api/v1/admin/**").hasAuthority(ADMIN_READ.name())
         .requestMatchers(POST, "/api/v1/admin/**").hasAuthority(ADMIN_CREATE.name())
         .requestMatchers(PUT, "/api/v1/admin/**").hasAuthority(ADMIN_UPDATE.name())
