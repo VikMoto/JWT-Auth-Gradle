@@ -2,9 +2,11 @@ package com.chatico.jwtauthgradle.service;
 
 
 
+import com.chatico.jwtauthgradle.auth.AuthenticationType;
 import com.chatico.jwtauthgradle.repository.UserChatRepository;
 import com.chatico.jwtauthgradle.token.ConfirmationToken;
 import com.chatico.jwtauthgradle.token.ConfirmationTokenService;
+import com.chatico.jwtauthgradle.userchat.Role;
 import com.chatico.jwtauthgradle.userchat.UserChat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.chatico.jwtauthgradle.userchat.Constants.ADMIN_PASSWORD;
@@ -47,6 +50,23 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 				.orElseThrow(() ->
 						new UsernameNotFoundException(
 								String.format(USER_NOT_FOUND, email)));
+	}
+
+	public void processOAuthPostLogin(String username) {
+		UserChat existUserChat = userChatRepository.findByEmailFetchRoes(username);
+
+		if (existUserChat == null) {
+			UserChat newUserChat = new UserChat();
+			newUserChat.setUsername(username);
+			newUserChat.setEmail(username);
+			newUserChat.setAuthType(AuthenticationType.GOOGLE);
+			newUserChat.setRole(Role.USER);
+			newUserChat.setEnabled(true);
+
+			userChatRepository.save(newUserChat);
+
+			System.out.println("Created new userChat: " + username);
+		}
 	}
 
 	public String signUpUser(UserChat userChat) {

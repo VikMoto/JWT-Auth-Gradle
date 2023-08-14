@@ -2,6 +2,7 @@ package com.chatico.jwtauthgradle.userchat;
 
 
 
+import com.chatico.jwtauthgradle.auth.AuthenticationType;
 import com.chatico.jwtauthgradle.token.Token;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -58,11 +59,11 @@ public class UserChat implements UserDetails {
     private Gender gender;
 
     @Enumerated(EnumType.STRING)
-    private Provider provider;
-
+    private Role role;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(name = "auth_type")
+    private AuthenticationType authType;
 
     @OneToMany(mappedBy = "userChat")
     private List<Token> tokens;

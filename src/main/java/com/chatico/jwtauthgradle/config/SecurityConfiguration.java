@@ -1,16 +1,38 @@
 package com.chatico.jwtauthgradle.config;
 
+import com.chatico.jwtauthgradle.auth.oauth.CustomOAuth2User;
+import com.chatico.jwtauthgradle.auth.oauth.CustomOAuth2UserService;
+import com.chatico.jwtauthgradle.auth.oauth.OAuthLoginSuccessHandler;
+import com.chatico.jwtauthgradle.service.UserDetailsServiceImpl;
+import com.chatico.jwtauthgradle.userchat.Constants;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
+import java.io.IOException;
+
+import static com.chatico.jwtauthgradle.userchat.Constants.GOOGLE_CLIENT_ID;
+import static com.chatico.jwtauthgradle.userchat.Constants.GOOGLE_CLIENT_SECRET;
 import static com.chatico.jwtauthgradle.userchat.Permission.*;
 import static com.chatico.jwtauthgradle.userchat.Role.ADMIN;
 import static com.chatico.jwtauthgradle.userchat.Role.MANAGER;
@@ -25,6 +47,9 @@ public class SecurityConfiguration {
   private final JwtAuthenticationFilter jwtAuthFilter;
   private final CustomAuthenticationProvider authenticationProvider;
   private final LogoutHandler logoutHandler;
+  private final OAuthLoginSuccessHandler oauthLoginSuccessHandler;
+  private final CustomOAuth2UserService oauth2UserService;
+  private final UserDetailsServiceImpl userDetailService;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -78,6 +103,28 @@ public class SecurityConfiguration {
         )
         .authenticationProvider(authenticationProvider)
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+//        .oauth2Login((login) -> login
+//                .loginPage("/login").permitAll()
+//                    .userInfoEndpoint(userInfoEndpoint->
+//                            userInfoEndpoint.userService(oauth2UserService))
+//                    .successHandler(new AuthenticationSuccessHandler() {
+//                                        @Override
+//                                        public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+//                                                                            FilterChain chain, Authentication authentication)
+//                                                throws IOException, ServletException {
+//                                            AuthenticationSuccessHandler.super.onAuthenticationSuccess(request, response, chain, authentication);
+//                                        }
+//                                        @Override
+//                                        public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+//                                                                            Authentication authentication) throws IOException, ServletException {
+//                                            System.out.println("AuthenticationSuccessHandler invoked");
+//                                            System.out.println("Authentication name: " + authentication.getName());
+//                                            CustomOAuth2User oauthUser = (CustomOAuth2User) authentication.getPrincipal();
+//                                            userDetailService.processOAuthPostLogin(oauthUser.getEmail());
+//                                            response.sendRedirect("/login?expired");
+//                                        }
+//                                    }
+//                    ))
         .logout((logout) ->
                 logout.deleteCookies("remove")
                         .invalidateHttpSession(false)
@@ -92,4 +139,26 @@ public class SecurityConfiguration {
 
     return http.build();
   }
+
+//    @Bean
+//    public ClientRegistrationRepository clientRegistrationRepository() {
+//        return new InMemoryClientRegistrationRepository(this.googleClientRegistration());
+//    }
+//
+//    private ClientRegistration googleClientRegistration() {
+//        return ClientRegistration.withRegistrationId("google")
+//                .clientId(GOOGLE_CLIENT_ID)
+//                .clientSecret(GOOGLE_CLIENT_SECRET)
+//                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+//                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+//                .redirectUri("http://localhost:8666/login/oauth2/code/google")
+//                .scope("openid", "profile", "email", "address", "phone")
+//                .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
+//                .tokenUri("https://www.googleapis.com/oauth2/v4/token")
+//                .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
+//                .userNameAttributeName(IdTokenClaimNames.SUB)
+//                .jwkSetUri("https://www.googleapis.com/oauth2/v3/certs")
+//                .clientName("Google")
+//                .build();
+//    }
 }

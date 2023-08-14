@@ -1,7 +1,9 @@
 package com.chatico.jwtauthgradle.config;
 
 
+import com.chatico.jwtauthgradle.auth.AuthenticationRequest;
 import com.chatico.jwtauthgradle.service.UserDetailsServiceImpl;
+import com.chatico.jwtauthgradle.userchat.UserChat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -54,6 +56,26 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
                     .build();
 
             return new UsernamePasswordAuthenticationToken(innerUser, user.getPassword(), user.getAuthorities());
+        } else {
+            throw new BadCredentialsException("Invalid password");
+        }
+
+    }
+
+    public UsernamePasswordAuthenticationToken checkAuthenticationRequest(UserChat userChat,
+                                                                          AuthenticationRequest request) {
+
+        if(passwordEncoder.matches(request.getPassword(), userChat.getPassword())) {
+            UserDetails innerUser = User.builder()
+                    .username(userChat.getUsername())
+                    .password(userChat.getPassword())
+                    .authorities(userChat.getAuthorities())
+                    .build();
+
+            return new UsernamePasswordAuthenticationToken(
+                    innerUser,
+                    userChat.getPassword(),
+                    userChat.getAuthorities());
         } else {
             throw new BadCredentialsException("Invalid password");
         }

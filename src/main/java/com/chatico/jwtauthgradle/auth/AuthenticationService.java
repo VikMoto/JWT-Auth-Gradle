@@ -1,6 +1,7 @@
 package com.chatico.jwtauthgradle.auth;
 
 
+import com.chatico.jwtauthgradle.config.CustomAuthenticationProvider;
 import com.chatico.jwtauthgradle.config.JwtService;
 import com.chatico.jwtauthgradle.token.ConfirmationTokenService;
 import com.chatico.jwtauthgradle.token.Token;
@@ -15,7 +16,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
@@ -32,7 +38,8 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final CustomAuthenticationProvider customAuthenticationProvider;
     public AuthenticationResponse register(RegistrationRequest request) {
         var user = UserChat.builder()
                 .firstName(request.getFirstname())
@@ -54,14 +61,11 @@ public class AuthenticationService {
 
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
         var user = userChatRepository.findByEmail(request.getEmail())
                 .orElseThrow();
+        UsernamePasswordAuthenticationToken authenticationToken =
+                customAuthenticationProvider.checkAuthenticationRequest(user, request);
+
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
         revokeAllUserTokens(user);
@@ -70,6 +74,22 @@ public class AuthenticationService {
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    private UsernamePasswordAuthenticationToken checkPassword(UserDetails user, String rowPassword) {
+
+        if(bCryptPasswordEncoder.matches(rowPassword, user.getPassword())) {
+            UserDetails innerUser = User.builder()
+                    .username(user.getUsername())
+                    .password(user.getPassword())
+                    .authorities(user.getAuthorities())
+                    .build();
+
+            return new UsernamePasswordAuthenticationToken(innerUser, user.getPassword(), user.getAuthorities());
+        } else {
+            throw new BadCredentialsException("Invalid password");
+        }
+
     }
 
     private void saveUserToken(UserChat userChat, String jwtToken) {
