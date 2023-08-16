@@ -3,6 +3,7 @@ package com.chatico.jwtauthgradle.config;
 import com.chatico.jwtauthgradle.auth.oauth.CustomOAuth2User;
 import com.chatico.jwtauthgradle.auth.oauth.CustomOAuth2UserService;
 import com.chatico.jwtauthgradle.auth.oauth.OAuthLoginSuccessHandler;
+import com.chatico.jwtauthgradle.repository.UserChatRepository;
 import com.chatico.jwtauthgradle.service.UserDetailsServiceImpl;
 import com.chatico.jwtauthgradle.userchat.Constants;
 import jakarta.servlet.FilterChain;
@@ -12,12 +13,18 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
@@ -46,7 +53,9 @@ public class SecurityConfiguration {
 
   private final JwtAuthenticationFilter jwtAuthFilter;
   private final CustomAuthenticationProvider authenticationProvider;
-  private final LogoutHandler logoutHandler;
+    private final UserChatRepository userChatRepository;
+    private final PasswordEncoder passwordEncoder;
+//  private final LogoutHandler logoutHandler;
   private final OAuthLoginSuccessHandler oauthLoginSuccessHandler;
   private final CustomOAuth2UserService oauth2UserService;
   private final UserDetailsServiceImpl userDetailService;
@@ -72,35 +81,18 @@ public class SecurityConfiguration {
                 "/swagger-ui.html"
         )
           .permitAll()
-
-
         .requestMatchers("/api/v1/management/**").hasAnyRole(ADMIN.name(), MANAGER.name())
-
-
         .requestMatchers(GET, "/api/v1/management/**").hasAnyAuthority(ADMIN_READ.name(), MANAGER_READ.name())
         .requestMatchers(POST, "/api/v1/management/**").hasAnyAuthority(ADMIN_CREATE.name(), MANAGER_CREATE.name())
         .requestMatchers(PUT, "/api/v1/management/**").hasAnyAuthority(ADMIN_UPDATE.name(), MANAGER_UPDATE.name())
         .requestMatchers(DELETE, "/api/v1/management/**").hasAnyAuthority(ADMIN_DELETE.name(), MANAGER_DELETE.name())
 
-
-       /* .requestMatchers("/api/v1/admin/**").hasRole(ADMIN.name())
-        .requestMatchers(GET, "/api/v1/admin/**").hasAuthority(ADMIN_READ.name())
-        .requestMatchers(POST, "/api/v1/admin/**").hasAuthority(ADMIN_CREATE.name())
-        .requestMatchers(PUT, "/api/v1/admin/**").hasAuthority(ADMIN_UPDATE.name())
-        .requestMatchers(DELETE, "/api/v1/admin/**").hasAuthority(ADMIN_DELETE.name())*/
-
-
         .anyRequest()
           .authenticated())
-        .sessionManagement((sessionManagement) ->
-                sessionManagement
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                        .sessionConcurrency((sessionConcurrency) ->
-                                sessionConcurrency
-                                        .maximumSessions(1)
-                                        .expiredUrl("/login?expired")
-                        )
-        )
+//        .sessionManagement((sessionManagement) ->
+//                sessionManagement
+//                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//        )
         .authenticationProvider(authenticationProvider)
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
         .oauth2Login((login) -> login
@@ -110,7 +102,7 @@ public class SecurityConfiguration {
                     .userInfoEndpoint(userInfoEndpoint->
                             userInfoEndpoint.userService(oauth2UserService))
                         .successHandler(oauthLoginSuccessHandler))
-            .logout(Customizer.withDefaults())
+//            .logout(Customizer.withDefaults())
 //        .logout((logout) ->
 //                logout.deleteCookies("remove")
 //                        .invalidateHttpSession(false)
@@ -126,25 +118,15 @@ public class SecurityConfiguration {
     return http.build();
   }
 
-//    @Bean
-//    public ClientRegistrationRepository clientRegistrationRepository() {
-//        return new InMemoryClientRegistrationRepository(this.googleClientRegistration());
-//    }
-//
-//    private ClientRegistration googleClientRegistration() {
-//        return ClientRegistration.withRegistrationId("google")
-//                .clientId(GOOGLE_CLIENT_ID)
-//                .clientSecret(GOOGLE_CLIENT_SECRET)
-//                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-//                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-//                .redirectUri("http://localhost:8666/login/oauth2/code/google")
-//                .scope("openid", "profile", "email", "address", "phone")
-//                .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
-//                .tokenUri("https://www.googleapis.com/oauth2/v4/token")
-//                .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
-//                .userNameAttributeName(IdTokenClaimNames.SUB)
-//                .jwkSetUri("https://www.googleapis.com/oauth2/v3/certs")
-//                .clientName("Google")
-//                .build();
-//    }
+
+    @Bean
+    public AuthenticationManager customAuthenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder =
+                http.getSharedObject(AuthenticationManagerBuilder.class);
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailService);
+        authProvider.setPasswordEncoder(passwordEncoder);
+        authenticationManagerBuilder.authenticationProvider(authProvider);
+        return authenticationManagerBuilder.build();
+    }
 }

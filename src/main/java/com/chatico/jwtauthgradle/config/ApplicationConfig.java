@@ -45,19 +45,7 @@ public class ApplicationConfig {
 //    return authProvider;
 //  }
 
-  @Bean
-  public AuthenticationManager customAuthenticationManager(HttpSecurity http) throws Exception {
-    AuthenticationManagerBuilder authenticationManagerBuilder =
-            http.getSharedObject(AuthenticationManagerBuilder.class);
 
-    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-    authProvider.setUserDetailsService(userDetailsService());
-    authProvider.setPasswordEncoder(passwordEncoder);
-
-    authenticationManagerBuilder.authenticationProvider(authProvider);
-
-    return authenticationManagerBuilder.build();
-  }
 
 
 }
