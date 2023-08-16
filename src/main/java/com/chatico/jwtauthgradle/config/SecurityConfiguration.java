@@ -103,35 +103,21 @@ public class SecurityConfiguration {
         )
         .authenticationProvider(authenticationProvider)
         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-//        .oauth2Login((login) -> login
-//                .loginPage("/login").permitAll()
-//                    .userInfoEndpoint(userInfoEndpoint->
-//                            userInfoEndpoint.userService(oauth2UserService))
-//                    .successHandler(new AuthenticationSuccessHandler() {
-//                                        @Override
-//                                        public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-//                                                                            FilterChain chain, Authentication authentication)
-//                                                throws IOException, ServletException {
-//                                            AuthenticationSuccessHandler.super.onAuthenticationSuccess(request, response, chain, authentication);
-//                                        }
-//                                        @Override
-//                                        public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-//                                                                            Authentication authentication) throws IOException, ServletException {
-//                                            System.out.println("AuthenticationSuccessHandler invoked");
-//                                            System.out.println("Authentication name: " + authentication.getName());
-//                                            CustomOAuth2User oauthUser = (CustomOAuth2User) authentication.getPrincipal();
-//                                            userDetailService.processOAuthPostLogin(oauthUser.getEmail());
-//                                            response.sendRedirect("/login?expired");
-//                                        }
-//                                    }
-//                    ))
-        .logout((logout) ->
-                logout.deleteCookies("remove")
-                        .invalidateHttpSession(false)
-                        .logoutUrl("/api/v1/auth/logout")
-                        .logoutSuccessUrl("/")
-                        .permitAll()
-        )
+        .oauth2Login((login) -> login
+                .loginPage("/login")
+                .defaultSuccessUrl("/api/v1/demo-controller")
+                .permitAll()
+                    .userInfoEndpoint(userInfoEndpoint->
+                            userInfoEndpoint.userService(oauth2UserService))
+                        .successHandler(oauthLoginSuccessHandler))
+            .logout(Customizer.withDefaults())
+//        .logout((logout) ->
+//                logout.deleteCookies("remove")
+//                        .invalidateHttpSession(false)
+//                        .logoutUrl("/api/v1/auth/logout")
+//                        .logoutSuccessUrl("/")
+//                        .permitAll()
+//        )
 
 //        .logoutHandler(logoutHandler)
 //        .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())

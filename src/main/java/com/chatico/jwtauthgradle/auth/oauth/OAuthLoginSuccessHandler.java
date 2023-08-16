@@ -39,7 +39,8 @@ public class OAuthLoginSuccessHandler extends SavedRequestAwareAuthenticationSuc
 		String username = oauth2User.getEmail();
 		
 		userChatService.updateAuthenticationType(username, oauth2ClientName);
-		
+//		response.sendRedirect("/api/v1/demo-controller");
+//		System.out.println("send redirect +  /api/v1/demo-controller");
 		super.onAuthenticationSuccess(request, response, authentication);
 	}
 

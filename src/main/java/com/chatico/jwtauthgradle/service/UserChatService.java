@@ -57,8 +57,23 @@ public class UserChatService {
 //
 //    }
     public void updateAuthenticationType(String username, String oauth2ClientName) {
-    	AuthenticationType authType = AuthenticationType.valueOf(oauth2ClientName.toUpperCase());
-    	userChatRepository.updateAuthenticationType(username, authType);
+        UserChat userChat = userChatRepository.findByEmailFetchRoes(username);
+        System.out.println("userChat = " + userChat);
+
+        AuthenticationType authType = AuthenticationType.valueOf(oauth2ClientName.toUpperCase());
+        if (userChat == null) {
+            UserChat standartUserChat = UserChat.builder()
+                    .username(username)
+                    .email(username)
+                    .password("")
+                    .role(Role.USER)
+                    .enabled(true)
+                    .authType(authType)
+                    .build();
+            userChatRepository.save(standartUserChat);
+        }
+
+//    	userChatRepository.updateAuthenticationType(username, authType);
     	System.out.println("Updated user's authentication type to " + authType);
     }	
 }
