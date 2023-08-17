@@ -76,6 +76,20 @@ public class AuthenticationService {
                 .build();
     }
 
+    public AuthenticationResponse authenticateOAuth(String userName) {
+        var user = userChatRepository.findByEmail(userName)
+                .orElseThrow();
+
+        var jwtToken = jwtService.generateToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
+        revokeAllUserTokens(user);
+        saveUserToken(user, jwtToken);
+        return AuthenticationResponse.builder()
+                .accessToken(jwtToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
     private UsernamePasswordAuthenticationToken checkPassword(UserDetails user, String rowPassword) {
 
         if(bCryptPasswordEncoder.matches(rowPassword, user.getPassword())) {

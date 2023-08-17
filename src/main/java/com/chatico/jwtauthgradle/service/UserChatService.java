@@ -1,11 +1,12 @@
 package com.chatico.jwtauthgradle.service;
 
 
+import com.chatico.jwtauthgradle.auth.AuthenticationResponse;
+import com.chatico.jwtauthgradle.auth.AuthenticationService;
 import com.chatico.jwtauthgradle.auth.AuthenticationType;
 import com.chatico.jwtauthgradle.repository.UserChatRepository;
 import com.chatico.jwtauthgradle.userchat.Role;
 import com.chatico.jwtauthgradle.userchat.UserChat;
-import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,13 +25,15 @@ public class UserChatService {
     private final BCryptPasswordEncoder passwordEncoder;
 
 
+
+
     @Value(value = "${" + ADMIN_USERNAME + "}")
     private String username;
 
     @Value(value = "${" + ADMIN_PASSWORD + "}")
     private String password;
 
-    public UserChatService(UserChatRepository userChatRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UserChatService(UserChatRepository userChatRepository, BCryptPasswordEncoder passwordEncoder, AuthenticationService authenticationService) {
         this.userChatRepository = userChatRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -72,6 +75,7 @@ public class UserChatService {
                     .build();
             userChatRepository.save(standartUserChat);
         }
+
 
 //    	userChatRepository.updateAuthenticationType(username, authType);
     	System.out.println("Updated user's authentication type to " + authType);

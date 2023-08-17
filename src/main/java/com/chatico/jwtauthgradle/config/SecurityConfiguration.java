@@ -1,45 +1,22 @@
 package com.chatico.jwtauthgradle.config;
 
-import com.chatico.jwtauthgradle.auth.oauth.CustomOAuth2User;
 import com.chatico.jwtauthgradle.auth.oauth.CustomOAuth2UserService;
 import com.chatico.jwtauthgradle.auth.oauth.OAuthLoginSuccessHandler;
 import com.chatico.jwtauthgradle.repository.UserChatRepository;
 import com.chatico.jwtauthgradle.service.UserDetailsServiceImpl;
-import com.chatico.jwtauthgradle.userchat.Constants;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
-import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutHandler;
 
-import java.io.IOException;
-
-import static com.chatico.jwtauthgradle.userchat.Constants.GOOGLE_CLIENT_ID;
-import static com.chatico.jwtauthgradle.userchat.Constants.GOOGLE_CLIENT_SECRET;
 import static com.chatico.jwtauthgradle.userchat.Permission.*;
 import static com.chatico.jwtauthgradle.userchat.Role.ADMIN;
 import static com.chatico.jwtauthgradle.userchat.Role.MANAGER;
@@ -47,7 +24,7 @@ import static org.springframework.http.HttpMethod.*;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
+
 @EnableMethodSecurity
 public class SecurityConfiguration {
 
@@ -60,7 +37,23 @@ public class SecurityConfiguration {
   private final CustomOAuth2UserService oauth2UserService;
   private final UserDetailsServiceImpl userDetailService;
 
-  @Bean
+    public SecurityConfiguration(JwtAuthenticationFilter jwtAuthFilter,
+                                 CustomAuthenticationProvider authenticationProvider,
+                                 UserChatRepository userChatRepository,
+                                 PasswordEncoder passwordEncoder,
+                                 @Lazy OAuthLoginSuccessHandler oauthLoginSuccessHandler,
+                                 CustomOAuth2UserService oauth2UserService,
+                                 UserDetailsServiceImpl userDetailService) {
+        this.jwtAuthFilter = jwtAuthFilter;
+        this.authenticationProvider = authenticationProvider;
+        this.userChatRepository = userChatRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.oauthLoginSuccessHandler = oauthLoginSuccessHandler;
+        this.oauth2UserService = oauth2UserService;
+        this.userDetailService = userDetailService;
+    }
+
+    @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
             .csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable())

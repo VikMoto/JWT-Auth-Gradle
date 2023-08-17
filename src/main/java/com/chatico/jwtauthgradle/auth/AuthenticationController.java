@@ -2,7 +2,7 @@ package com.chatico.jwtauthgradle.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,10 +10,15 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping(path = "api/v1/auth")
-@AllArgsConstructor
 public class AuthenticationController {
 
+
     private final AuthenticationService authenticationService;
+
+    public AuthenticationController(@Lazy AuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
+    }
+
 
     @PostMapping("/registration")
     public ResponseEntity<AuthenticationResponse> register(
