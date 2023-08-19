@@ -43,9 +43,7 @@ public class AuthenticationController {
 
     @GetMapping("/oAuthAuthenticate")
     public ResponseEntity<AuthenticationResponse> oAuthAuthenticate(
-            HttpServletRequest request, HttpServletResponse response,
-           Authentication authentication) throws ServletException, IOException
-     {
+           Authentication authentication)  {
          CustomOAuth2User oauth2User = (CustomOAuth2User) authentication.getPrincipal();
          String oauth2ClientName = oauth2User.getOauth2ClientName();
          String username = oauth2User.getEmail();
